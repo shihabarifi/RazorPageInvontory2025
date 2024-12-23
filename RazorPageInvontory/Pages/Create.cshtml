@@ -1,0 +1,114 @@
+﻿@page
+@model CreateModel
+@{
+    ViewData["Title"] = "تعديل فاتورة بيع";
+}
+
+<div dir="rtl" class="container">
+    <form method="post" id="invoiceForm">
+        <div class="card">
+            <div class="card-header">
+                <h3>@(Model.Invoice?.InvoiceId > 0 ? "تعديل فاتورة بيع" : "فاتورة بيع جديدة")</h3>
+            </div>
+            <div class="card-body">
+                <!-- رأس الفاتورة -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Invoice.InvoiceId">رقم الفاتورة</label>
+                            <input asp-for="Invoice.InvoiceId" class="form-control" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Invoice.InvoiceDate">التاريخ</label>
+                            <input asp-for="Invoice.InvoiceDate" type="date" class="form-control" value="@(Model.Invoice?.InvoiceDate.ToString("yyyy-MM-dd"))" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Invoice.Currency">العملة</label>
+                            <select asp-for="Invoice.Currency" class="form-control">
+                                <option value="SAR">ريال سعودي</option>
+                                <option value="USD">دولار أمريكي</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Invoice.CustomerName">اسم العميل</label>
+                            <input asp-for="Invoice.CustomerName" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تفاصيل الفاتورة -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered" id="detailsTable">
+                        <thead>
+                            <tr>
+                                <th>رقم الصنف</th>
+                                <th>اسم الصنف</th>
+                                <th>الوحدة</th>
+                                <th>الكمية</th>
+                                <th>التكلفة</th>
+                                <th>الخصم</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Invoice?.Details != null)
+                            {
+                                @for (var i = 0; i < Model.Invoice.Details.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="text" name="Invoice.Details[@i].ItemCode"
+                                                   value="@Model.Invoice.Details[i].ItemCode" class="form-control" required />
+                                        </td>
+                                        <td>
+                                            <select name="Invoice.Details[0].ItemName" class="form-control item-select" value="@Model.Invoice.Details[i].ItemName">
+                                                <option selected>@Model.Invoice.Details[i].ItemName </option>
+</select>
+                                            
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Invoice.Details[@i].Unit"
+                                                   value="@Model.Invoice.Details[i].Unit" class="form-control" required />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="Invoice.Details[@i].Quantity"
+                                                   value="@Model.Invoice.Details[i].Quantity" class="form-control" required />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="Invoice.Details[@i].Cost"
+                                                   value="@Model.Invoice.Details[i].Cost" class="form-control" required />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="Invoice.Details[@i].Discount"
+                                                   value="@Model.Invoice.Details[i].Discount" class="form-control" required />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger" onclick="deleteRow(this)">حذف</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" id="addRow">إضافة صف</button>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-success">حفظ الفاتورة</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="~/js/salesInvoice.js"></script>
+}
