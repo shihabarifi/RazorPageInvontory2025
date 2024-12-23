@@ -1,0 +1,228 @@
+﻿@page "/pos"
+@model RazorPageInvontory.Pages.Moduls.POSSys.POSModel
+@{
+}
+
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="breadcrumb-wrapper py-3 mb-4">
+            <span class="text-muted fw-light">البيع مباشر /</span> فاتورة بيع مباشر
+        </h4>
+
+        <div class="row">
+            <form method="post" id="invoiceForm">
+            <!-- Select2 -->
+            <div class="col-12">
+                <div class="card mb-4">
+                    <h5 class="card-header">إضافة</h5>
+                    <div class="card-body">
+                        <div class="row">
+                            @* الفترة *@
+                            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                <label for="select2Basic" class="form-label">الفترة</label>
+                                <select asp-for="PeriodName" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <option value="الصباحية">الصباحية</option>
+                                    <option value="المسائية">المسائية</option>
+
+
+                                </select>
+                            </div>
+                            @* الصندوف *@
+                            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                <label for="select2Basic" class="form-label">الصندوف</label>
+                                <select asp-for="CashBoxID" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <option value="">اختر الصندوق</option>
+                                    @if (Model.Funds != null)
+                                    {
+                                        @foreach (var Fund in Model.Funds)
+                                        {
+                                            <option value="@Fund.ID">@Fund.FundName</option>
+                                        }
+                                    }
+
+
+                                </select>
+                            </div>
+
+                            @* نقطة البيع  *@
+                            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                <label for="select2Basic" class="form-label">نقطة البيع</label>
+                                <select asp-for="SalePointID" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                   
+                                    @if (Model.Funds != null)
+                                    {
+                                        @foreach (var SalePoint in Model.SalePoints)
+                                        {
+                                            <option value="@SalePoint.SalePointID">@SalePoint.SalePointNumber</option>
+                                        }
+                                    }
+
+
+                                </select>
+                            </div>
+                        
+                        
+                        </div>
+                        <div class="row">
+
+                            @* المخزن  *@
+                            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                <label for="select2Basic" class="form-label">المخزن</label>
+
+                                <select asp-for="StoreID" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    @* <option value="">اختر حساب</option> *@
+
+                                    @if (Model.Stores != null)
+                                    {
+                                        @foreach (var Store in Model.Stores)
+                                        {
+                                            <option value="@Store.ID">@Store.StoreName</option>
+                                        }
+                                    }
+
+
+                                </select>
+                            </div>
+
+                            @* الدفع *@
+                            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                <label for="select2Basic" class="form-label">الدفع</label>
+                                <select asp-for="PaymentMethod" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <option value="Cash">نقداً</option>
+                                    <option value="Credit">آجل</option>
+                                    <option value="Cheek">شيك</option>
+                                </select>
+                            </div>
+
+                            @* الحساب  *@
+                            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                <label for="select2Basic" class="form-label">الحساب</label>
+                                <select asp-for="customerSelect" id="select2Basic" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    @* <option value="">اختر حساب</option> *@
+
+                                    @if (Model.Customers != null)
+                                    {
+                                        @foreach (var Customer in Model.Customers)
+                                        {
+                                            <option value="@Customer.ID">@Customer.CustomerName</option>
+                                        }
+                                    }
+
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /Select2 -->
+            <!-- Form Repeater -->
+            <div class="col-12">
+                <div class="card">
+                    <h5 class="card-header">تفاصيل الفاتورة </h5>
+                    <div class="card-body">
+                       
+                            <!-- منتجات الفاتورة -->
+                            <div class="invoice-items mt-5">
+                                <table id="productsTable" class="table table-bordered">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>رقم الصنف</th>
+                                            <th style="width: 20%">اسم الصنف</th>
+                                            <th style="width: 12%">الوحدة</th>
+                                            <th style="width: 12%">سعر الوحدة</th>
+                                            <th>الكمية</th>
+                                            <th>نسبة الخصم</th>
+                                            <th style="display: none;">قيمة الخصم</th>
+                                            <th style="width: 12%">الإجمالي</th>
+                                            <th>حذف</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                       
+
+                                    </tbody>
+                                </table>
+                                
+                                <button id="addProduct" class="btn btn-primary" style="margin-top: 10px;"><i class="bx bx-plus"></i> إضافة جديد </button>
+                            </div>
+
+                            <!-- المبالغ الإجمالية -->
+                            <div class="form-row" style="padding-top: 18px;">
+                                <table  class="table table-bordered">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>إجمالي المبلغ</th>
+                                            <th >نسبة الخصم %</th>
+                                            <th >الخصم بالمبلغ</th>
+                                            <th>المبلغ المدفوع</th>
+                                            <th>المبلغ المتبقي</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                   
+                                    <td>
+                                        <div class="form-group col-md-12">
+                                            <input type="number" class="form-control" id="totalAmount" value="@Model.TotalAmount" name="totalAmount" asp required readonly>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group col-md-12">
+                                            <input type="number" class="form-control" id="discount" name="discount" value="@Model.Discount" required>
+                                        </div>
+                                    </td>
+                                    <td>
+                                    <div class="form-group col-md-12">
+                                     
+                                        <input type="number" class="form-control" id="DiscountAmount" value="@Model.DiscountAmount" name="DiscountAmount" required readonly>
+                                    </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group col-md-12">
+                                         
+                                            <input type="number" class="form-control" id="PaidAmoint" name="PaidAmoint" value="@Model.paidAmoint" />
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group col-md-12">
+                                           
+                                            <input type="number" class="form-control" id="netAmount" name="netAmount" value="@Model.NetAmount" readonly />
+                                        </div>
+                                    </td>
+                                   
+                                </table>
+                                
+                               
+                                
+
+                               
+
+                            
+                                <!-- حقل مخفي يحتوي على قيمة رقم المستخدم -->
+                                <input type="hidden" id="createdBy" name="createdBy" value="1" />
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-block">حفظ الفاتورة</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- /Form Repeater -->
+        </div>
+    </div>
+    <!-- / Content -->
+ 
+
+    <div class="content-backdrop fade"></div>
+</div>
+
+<!-- Content wrapper -->
+@section Scripts {
+    <script src="~/js/invoice.js"></script>
+   @*  <script src="~/js/salesInvoice.js"></script> *@
+}
+

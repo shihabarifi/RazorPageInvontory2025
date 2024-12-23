@@ -1,6 +1,8 @@
 ﻿using RazorPageInvontory.Modules.UsersSys.DAL;
 using RazorPageInvontory.Modules.UsersSys.BLL;
 using RazorPageInvontory.ServicesLayer;
+using RazorPageInvontory.Modules.POSSys.DAL;
+using RazorPageInvontory.Modules.POSSys.BLL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,8 @@ builder.Services.AddHttpClient<AuthenticateUserSer>((provider, client) =>
 // إعداد HttpClient للتعامل مع API
 builder.Services.AddTransient<AuthenticateUserManager>();
 builder.Services.AddTransient<AuthenticateUserSer>();
+builder.Services.AddTransient<POSManager>();
+builder.Services.AddTransient<POSSer>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5229/") });
 
 //builder.Services.AddHttpClient("SalesAPI", client =>

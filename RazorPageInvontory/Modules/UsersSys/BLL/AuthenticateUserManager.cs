@@ -20,7 +20,6 @@ namespace RazorPageInvontory.Modules.UsersSys.BLL
                 password = password
             };
 
-            var ss= await _authService.GetCustomersDataAsync();
 
             return await _authService.LoginAsync(request);
         }

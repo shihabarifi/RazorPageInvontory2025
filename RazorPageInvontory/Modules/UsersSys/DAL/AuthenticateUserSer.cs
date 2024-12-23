@@ -52,39 +52,6 @@ namespace RazorPageInvontory.Modules.UsersSys.DAL
             return response.StatusCode.ToString();
         }
 
-        public async Task<List<CustomerInfo>> GetCustomersDataAsync()
-        {
-            try
-            {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var customers = await _httpClient.GetFromJsonAsync<List<CustomerInfo>>("/api/CustomersInfo");
-
-                return customers; // إرجاع قائمة العملاء مباشرةً
-            }
-            catch (HttpRequestException ex)
-            {
-                // معالجة أخطاء HTTP (مثل مشاكل الاتصال أو رموز حالة خطأ)
-                Console.WriteLine($"HTTP Request Error: {ex.Message}");
-                // يمكنك هنا فحص ex.StatusCode للحصول على رمز حالة HTTP
-                return null; // أو رمي استثناء إذا كنت تفضل ذلك
-            }
-            catch (NotSupportedException ex) // إذا كان المحتوى ليس JSON صالحًا
-            {
-                Console.WriteLine($"Content is not valid JSON: {ex.Message}");
-                return null;
-            }
-            catch (JsonException ex) // خطأ في تحليل JSON
-            {
-                Console.WriteLine($"JSON parsing error: {ex.Message}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                // معالجة أي أخطاء أخرى
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                return null;
-            }
-        }
 
 
     }
