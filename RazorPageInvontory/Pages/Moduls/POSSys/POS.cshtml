@@ -35,7 +35,7 @@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">الصندوف</label>
                                     <select asp-for="sPSellInvoice.AccountID" id="AccountID" class="select2 form-select form-select-lg" data-allow-clear="true">
-                                    <option value="">اختر الصندوق</option>
+                                   
                                     @if (Model.Funds != null)
                                     {
                                         @foreach (var Fund in Model.Funds)
@@ -108,7 +108,7 @@
                                     {
                                         @foreach (var Customer in Model.Customers)
                                         {
-                                            <option value="@Customer.ID">@Customer.CustomerName</option>
+                                                <option value="@Customer.CustomerName">@Customer.CustomerName</option>
                                         }
                                     }
 
@@ -122,11 +122,11 @@
 
                                 <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                     <label for="select2Basic" class="form-label">التاريخ</label>
-                                    <input asp-for="sPSellInvoice.TheDate" type="date" id="TheDate" placeholder="MM/DD/YYYY" class="form-control">
+                                    <input asp-for="sPSellInvoice.TheDate" value="@(Model.sPSellInvoice?.TheDate)" type="date" id="TheDate" placeholder="MM/DD/YYYY" class="form-control">
                                 </div>
 
                                  @* الرقم  *@
-                                <div class="col-12 col-lg-6 col-xl-3 mb-0 mb-3">
+                                <div class="col-12 col-lg-6 col-xl-4 mb-0 mb-4">
                                     <label class="form-label" for="form-repeater-1-1">الرقم</label>
                                     <input asp-for="sPSellInvoice.TheNumber" id="TheNumber" type="text" value="1" class="form-control" readonly>
                                 </div>
@@ -135,7 +135,7 @@
                                 <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                     <div class="input-group input-group-merge">
                                         <span class="input-group-text">الملاحظة</span>
-                                        <textarea asp-for="sPSellInvoice.Notes" id="Notes" class="form-control" aria-label="With textarea" style="height: 66px;"></textarea>
+                                        <textarea asp-for="sPSellInvoice.Notes" id="" value="@(Model.sPSellInvoice?.Notes)" class="form-control" aria-label="With textarea" style="height: 66px;"></textarea>
                                     </div>
                                 </div>
 

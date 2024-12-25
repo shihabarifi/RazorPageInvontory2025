@@ -1,9 +1,9 @@
 ﻿using RazorPageInvontory.Modules.UsersSys.DAL;
 using RazorPageInvontory.Modules.UsersSys.BLL;
-using RazorPageInvontory.ServicesLayer;
 using RazorPageInvontory.Modules.POSSys.DAL;
 using RazorPageInvontory.Modules.POSSys.BLL;
 using Microsoft.AspNetCore.Mvc;
+using RazorPageInvontory.Shared.BLLSharedALL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,9 +18,6 @@ builder.Services.AddRazorPages();
 //    options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
 //});
 
-
-// إضافة خدمات Razor Pages
-//builder.Services.AddRazorPages();
 builder.Services.AddHttpClient<AuthenticateUserSer>((provider, client) =>
 {
     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
@@ -38,26 +35,15 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-
-// تسجيل الخدمات في نظام حقن التبعية
-//builder.Services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
-//builder.Services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
-
 // إعداد HttpClient للتعامل مع API
 builder.Services.AddTransient<AuthenticateUserManager>();
 builder.Services.AddTransient<AuthenticateUserSer>();
 builder.Services.AddTransient<POSManager>();
 builder.Services.AddTransient<POSSer>();
+builder.Services.AddTransient<BLLSharedServices>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5229/") });
 
-//builder.Services.AddHttpClient("SalesAPI", client =>
-//{
-//    client.BaseAddress = new Uri(builder.Configuration["APISettings:BaseUrl"]);
-//    client.DefaultRequestHeaders.Add("Accept", "application/json");
-//});
 
-// Add services to the container.
-builder.Services.AddRazorPages();
 
 
 var app = builder.Build();
@@ -68,7 +54,7 @@ app.Use(async (context, next) =>
 {
     if (context.Request.Path == "/")
     {
-        context.Response.Redirect("/Employee");
+        context.Response.Redirect("/Login");
         return;
     }
     await next();

@@ -14,39 +14,14 @@ namespace RazorPageInvontory.Modules.POSSys.BLL
         {
             _posService = posService;
         }
-        public async Task<List<CustomerInfo>> CustomerInfoAsync()
-        {
-
-            return await _posService.GetCustomersDataAsync();
-        }
-
-        public async Task<List<FundUser>> FundUserAsync()
-        {
-
-            return await _posService.GetFundUserDataAsync();
-        }
+       
 
         public async Task<List<SalePointUser>> SalesPointsAsync()
         {
 
             return await _posService.GetSalesPointsAsync();
         }
-        public async Task<List<Store>> StoreAsync()
-        {
-
-            return await _posService.GetStoresAsync();
-        }
-
-        public async Task<List<Products>> ProductsAsync()
-        {
-
-            return await _posService.GetProductsAsync();
-        }
-        public async Task<List<Unit>> UnitsAsync(long ClassID)
-        {
-
-            return await _posService.GetUnitsByClassIdDataAsync(ClassID);
-        }
+      
         public async Task<(bool Success, string Message)> SendInvoiceToApiAsync(SPSellInvoice invoice)
         {
             try
@@ -55,11 +30,12 @@ namespace RazorPageInvontory.Modules.POSSys.BLL
                 if (response.IsSuccessStatusCode)
                 {
                     var responseString = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<(bool Success, string Message)>(responseString, new JsonSerializerOptions
+
+                    var result = JsonSerializer.Deserialize<InvoiceResponse>(responseString, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
-                    return (result.Success, result.Message);
+                    return (result.Success, " تم اضافة فاتورة بيع مباشر بـID  :  " + result.id + " بنجاح");
                 }
                 else
                 {
@@ -72,5 +48,19 @@ namespace RazorPageInvontory.Modules.POSSys.BLL
             }
         }
 
+
+
+        public async Task<SPSellInvoice> GetInvoiceByIdAsync(int invoiceId)
+        {
+            return await _posService.GetInvoiceByIdAsync(invoiceId);
         }
+
+        public class InvoiceResponse
+        {
+            public int id { get; set; }
+            public bool Success { get; set; }
+        }
+
+    }
+
 }

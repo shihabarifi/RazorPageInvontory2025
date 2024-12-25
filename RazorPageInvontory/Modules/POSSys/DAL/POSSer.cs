@@ -30,7 +30,8 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         {
             try
             {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var customers = await _httpClient.GetFromJsonAsync<List<CustomerInfo>>("/api/CustomersInfo");
 
                 return customers??new List<CustomerInfo>(); // إرجاع قائمة العملاء مباشرةً
@@ -59,7 +60,8 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         {
             try
             {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var funds = await _httpClient.GetFromJsonAsync<List<FundUser>>("/api/FundsUsers");
 
                 return funds ?? new List<FundUser>(); // إرجاع قائمة العملاء مباشرةً
@@ -89,7 +91,8 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         {
             try
             {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var pointUsers = await _httpClient.GetFromJsonAsync<List<SalePointUser>>("/api/SalesPoints");
 
                 return pointUsers ?? new List<SalePointUser>(); // إرجاع قائمة العملاء مباشرةً
@@ -118,7 +121,8 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         {
             try
             {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var stores = await _httpClient.GetFromJsonAsync<List<Store>>("/api/Stores");
 
                 return stores ?? new List<Store>(); // إرجاع قائمة العملاء مباشرةً
@@ -177,8 +181,9 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         {
             try
             {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-          
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var units = await _httpClient.GetFromJsonAsync<List<Unit>>($"/api/Units/{classId}"); // تمرير ClassID في URL
 
 
@@ -208,6 +213,8 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
 
             try
             {
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PostAsJsonAsync($"/api/SPSellInvoice", invoice);
                 return response;
               
@@ -227,6 +234,35 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }   
         }
-        
+
+
+        /// <summary>
+        /// API جلب بيانات الفاتورة من
+        /// </summary>
+        /// <returns>قائمة باسماء الاصناف</returns>
+        public async Task<SPSellInvoice> GetInvoiceByIdAsync(int id)
+        {
+            try
+            {
+                var sPSellInvoice = await _httpClient.GetFromJsonAsync<SPSellInvoice>($"/api/SPSellInvoice/{id}");
+                if (sPSellInvoice == null)
+                {
+                    throw new Exception("الفاتورة غير موجودة.");
+                }
+
+                return sPSellInvoice;
+            }
+            catch (HttpRequestException ex)
+            {
+                // معالجة الأخطاء المتعلقة بالشبكة أو الخادم
+                throw new Exception($"خطأ في الاتصال بـ API: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                // معالجة الأخطاء العامة
+                throw new Exception($"حدث خطأ أثناء جلب الفاتورة: {ex.Message}", ex);
+            }
+        }
+
     }
 }

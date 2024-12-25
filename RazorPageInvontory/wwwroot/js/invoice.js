@@ -473,7 +473,29 @@ $("#addInv").on("click", function () {
         },
         data: JSON.stringify(sPSellInvoice), // إرسال بيانات employeeData
         success: function (response) {
-            $("#result").html(`<p>${response.message}</p>`); // عرض رسالة النجاح
+            if (true) {
+                Swal.fire({
+                    title: 'نجاح',
+                    text: response.message,
+                    icon: 'success',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                });
+            }
+         else {
+                    Swal.fire({
+                        title: 'خطأ',
+                        text: response.message,
+                        icon: 'error',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
+        }
+          //  $("#result").html(`<p>${response.message}</p>`); // عرض رسالة النجاح
         },
         error: function (xhr) {
             $("#result").html(`<p style="color: red;">Error: ${xhr.responseText}</p>`); // عرض رسالة الخطأ
