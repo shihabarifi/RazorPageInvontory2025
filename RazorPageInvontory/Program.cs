@@ -3,11 +3,22 @@ using RazorPageInvontory.Modules.UsersSys.BLL;
 using RazorPageInvontory.ServicesLayer;
 using RazorPageInvontory.Modules.POSSys.DAL;
 using RazorPageInvontory.Modules.POSSys.BLL;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor(); // لإتاحة الوصول للـ Session
 builder.Services.AddSession(); // تفعيل الـ Session
+
+// إضافة خدمات Razor Pages
+builder.Services.AddRazorPages();
+
+//builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
+//{
+//    options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
+//});
+
+
 // إضافة خدمات Razor Pages
 //builder.Services.AddRazorPages();
 builder.Services.AddHttpClient<AuthenticateUserSer>((provider, client) =>
@@ -22,6 +33,10 @@ builder.Services.AddHttpClient<AuthenticateUserSer>((provider, client) =>
 });
 
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 
 
 // تسجيل الخدمات في نظام حقن التبعية
@@ -44,25 +59,29 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+
 var app = builder.Build();
+app.UseCors();
 
 // إضافة إعادة التوجيه للصفحة الافتراضية
-//app.Use(async (context, next) =>
-//{
-//    if (context.Request.Path == "/")
-//    {
-//        context.Response.Redirect("/Login", permanent: false);
-//        return;
-//    }
-//    await next();
-//});
-
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+app.Use(async (context, next) =>
 {
-    app.UseExceptionHandler("/Error");
+    if (context.Request.Path == "/")
+    {
+        context.Response.Redirect("/Employee");
+        return;
+    }
+    await next();
+});
+
+
+// إعداد المسار ونقاط النهاية
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
+// Configure the HTTP request pipeline.
+
 app.UseStaticFiles();
 app.UseSession(); // تفعيل الـ Session
 app.UseRouting();

@@ -4,6 +4,8 @@ using RazorPageInvontory.Models;
 using RazorPageInvontory.Modules.POSSys.BLL;
 using RazorPageInvontory.Modules.POSSys.Models;
 using System.Text.Json;
+using static RazorPageInvontory.Pages.EmployeeModel;
+using static RazorPageInvontory.Pages.Moduls.POSSys.POSModel;
 
 namespace RazorPageInvontory.Pages.Moduls.POSSys
 {
@@ -22,18 +24,60 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
             SalePoints=await _posManager.SalesPointsAsync();
             Stores = await _posManager.StoreAsync();
         }
+        public class Invoices
+        {
+            public string? PeriodNumber { get; set; }
+            public int SalePointID { get; set; }
+            public string? TheNumber { get; set; }
+            public DateTime TheDate { get; set; }
+            public string? ThePay { get; set; }
+            public int StoreID { get; set; }
+            public int AccountID { get; set; }
+            public string? CustomerName { get; set; }
+            public string? Notes { get; set; }
+            public int UserID { get; set; }
+            public decimal Descount { get; set; }
+            public decimal Debited { get; set; }
+            public decimal PayAmount { get; set; }
+        }
 
-        public async Task<IActionResult> OnPostAsync()
+        [BindProperty]
+        public SPSellInvoice sPSellInvoice { get; set; } = new SPSellInvoice();
+        [BindProperty]
+        public Invoices Invoice { get; set; } = new Invoices();
+
+        public async Task<IActionResult> OnPostSaveAsync([FromBody] SPSellInvoice sPSellInvoice)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-         
+           
 
+            if (sPSellInvoice == null || sPSellInvoice.InvoiceDetails == null || !sPSellInvoice.InvoiceDetails.Any())
+            {
+                var result = _posManager.SendInvoiceToApiAsync(sPSellInvoice).Result;
+                if (result.Success)
+                {
+                    string message = " „ Õ›Ÿ «·›« Ê—… »‰Ã«Õ.";
+                    return new JsonResult(new { message });
+                   // return new JsonResult(new { success = true, message = " „ Õ›Ÿ «·›« Ê—… »‰Ã«Õ." });
+                }
+                else
+                {
+                    string message = "ÕœÀ Œÿ√ √À‰«¡ Õ›Ÿ «·›« Ê—…: ";
+                    return new JsonResult(new { message });
+
+                   
+                }
+            }
+           
             return Page();
+
         }
+
+     
 
         #region œÊ«· «·⁄„·Ì« 
         //Ã·» «·«’‰«›
@@ -72,8 +116,7 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
         #endregion
 
         #region «·„ €Ì—« 
-        [BindProperty]
-        public SalesInvoiceHeader Invoice { get; set; }
+ 
 
         public List<FundUser> Funds { get; set; }
         public List<SalePointUser> SalePoints { get; set; }
@@ -81,35 +124,7 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
         public List<CustomerInfo> Customers { get; set; } = new List<CustomerInfo>();
         
 
-        [BindProperty]
-        public string PeriodName { get; set; }
-
-        [BindProperty]
-        public long CashBoxID { get; set; }
-
-        [BindProperty]
-        public long SalePointID { get; set; }
-
-        [BindProperty]
-        public long StoreID { get; set; }
-
-        [BindProperty]
-        public int InvoiceID { get; set; }
-
-        [BindProperty]
-        public DateTime invoiceDate { get; set; }
-
-
-        [BindProperty]
-        public int customerSelect { get; set; }
-
-        [BindProperty]
-        public int CustomerNumber { get; set; }
-
-        [BindProperty]
-        public string? PaymentMethod { get; set; }
-
-
+        
         [BindProperty]
         public decimal TotalAmount { get; set; }
 
@@ -131,11 +146,9 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
         public decimal paidAmoint { get; set; }
 
 
-        [BindProperty]
-        public int CreatedBy { get; set; }
 
-        
 
+        public List<POSModel> products { get; set; }
 
         [BindProperty]
         public int ProductID { get; set; }

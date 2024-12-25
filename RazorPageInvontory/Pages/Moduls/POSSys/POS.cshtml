@@ -2,8 +2,7 @@
 @model RazorPageInvontory.Pages.Moduls.POSSys.POSModel
 @{
 }
-
-
+<link href="~/assets/vendor/libs/flatpickr/flatpickr.css" rel="stylesheet" />
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -19,12 +18,13 @@
             <div class="col-12">
                 <div class="card mb-4">
                     <h5 class="card-header">إضافة</h5>
+                     <div id="result"></div>
                     <div class="card-body">
                         <div class="row">
                             @* الفترة *@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">الفترة</label>
-                                <select asp-for="PeriodName" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <select asp-for="sPSellInvoice.PeriodNumber" id="PeriodNumber" class="select2 form-select form-select-lg" data-allow-clear="true">
                                     <option value="الصباحية">الصباحية</option>
                                     <option value="المسائية">المسائية</option>
 
@@ -34,7 +34,7 @@
                             @* الصندوف *@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">الصندوف</label>
-                                <select asp-for="CashBoxID" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <select asp-for="sPSellInvoice.AccountID" id="AccountID" class="select2 form-select form-select-lg" data-allow-clear="true">
                                     <option value="">اختر الصندوق</option>
                                     @if (Model.Funds != null)
                                     {
@@ -51,7 +51,7 @@
                             @* نقطة البيع  *@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">نقطة البيع</label>
-                                <select asp-for="SalePointID" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <select asp-for="sPSellInvoice.SalePointID" id="SalePointID" class="select2 form-select form-select-lg" data-allow-clear="true">
                                    
                                     @if (Model.Funds != null)
                                     {
@@ -73,7 +73,7 @@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">المخزن</label>
 
-                                <select asp-for="StoreID" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <select asp-for="sPSellInvoice.StoreID" id="StoreID" class="select2 form-select form-select-lg" data-allow-clear="true">
                                     @* <option value="">اختر حساب</option> *@
 
                                     @if (Model.Stores != null)
@@ -91,17 +91,17 @@
                             @* الدفع *@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">الدفع</label>
-                                <select asp-for="PaymentMethod" id="" class="select2 form-select form-select-lg" data-allow-clear="true">
-                                    <option value="Cash">نقداً</option>
-                                    <option value="Credit">آجل</option>
-                                    <option value="Cheek">شيك</option>
+                                    <select asp-for="sPSellInvoice.ThePay" id="ThePay" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                        <option value="نقد">نقداً</option>
+                                        <option value="آجل">آجل</option>
+                                        <option value="شيك">شيك</option>
                                 </select>
                             </div>
 
                             @* الحساب  *@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">الحساب</label>
-                                <select asp-for="customerSelect" id="select2Basic" class="select2 form-select form-select-lg" data-allow-clear="true">
+                                    <select asp-for="sPSellInvoice.CustomerName" id="CustomerName" class="select2 form-select form-select-lg" data-allow-clear="true">
                                     @* <option value="">اختر حساب</option> *@
 
                                     @if (Model.Customers != null)
@@ -116,6 +116,31 @@
                                 </select>
                             </div>
                         </div>
+                            <div class="row">
+
+                                @* التاريخ  *@
+
+                                <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                    <label for="select2Basic" class="form-label">التاريخ</label>
+                                    <input asp-for="sPSellInvoice.TheDate" type="date" id="TheDate" placeholder="MM/DD/YYYY" class="form-control">
+                                </div>
+
+                                 @* الرقم  *@
+                                <div class="col-12 col-lg-6 col-xl-3 mb-0 mb-3">
+                                    <label class="form-label" for="form-repeater-1-1">الرقم</label>
+                                    <input asp-for="sPSellInvoice.TheNumber" id="TheNumber" type="text" value="1" class="form-control" readonly>
+                                </div>
+
+                                @* الملاحظة *@
+                                <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                                    <div class="input-group input-group-merge">
+                                        <span class="input-group-text">الملاحظة</span>
+                                        <textarea asp-for="sPSellInvoice.Notes" id="Notes" class="form-control" aria-label="With textarea" style="height: 66px;"></textarea>
+                                    </div>
+                                </div>
+
+                               
+                            </div>
                     </div>
                 </div>
             </div>
@@ -148,7 +173,7 @@
                                     </tbody>
                                 </table>
                                 
-                                <button id="addProduct" class="btn btn-primary" style="margin-top: 10px;"><i class="bx bx-plus"></i> إضافة جديد </button>
+                                <button type="button" id="addProduct" class="btn btn-primary" style="margin-top: 10px;"><i class="bx bx-plus"></i> إضافة جديد </button>
                             </div>
 
                             <!-- المبالغ الإجمالية -->
@@ -177,14 +202,14 @@
                                     </td>
                                     <td>
                                     <div class="form-group col-md-12">
-                                     
-                                        <input type="number" class="form-control" id="DiscountAmount" value="@Model.DiscountAmount" name="DiscountAmount" required readonly>
+
+                                            <input asp-for="sPSellInvoice.Descount" type="number" class="form-control" id="DiscountAmount" value="@Model.DiscountAmount" name="DiscountAmount" required readonly>
                                     </div>
                                     </td>
                                     <td>
                                         <div class="form-group col-md-12">
                                          
-                                            <input type="number" class="form-control" id="PaidAmoint" name="PaidAmoint" value="@Model.paidAmoint" />
+                                            <input asp-for="sPSellInvoice.PayAmount" type="number" class="form-control" id="PaidAmoint" name="PaidAmoint" value="@Model.paidAmoint" />
                                         </div>
                                     </td>
                                     <td>
@@ -205,9 +230,9 @@
                                 <!-- حقل مخفي يحتوي على قيمة رقم المستخدم -->
                                 <input type="hidden" id="createdBy" name="createdBy" value="1" />
                             </div>
-
-                            <button type="submit" class="btn btn-success btn-block">حفظ الفاتورة</button>
-                        </form>
+                            @Html.AntiForgeryToken() <!-- تضمين رمز التزوير -->
+                            <button id="addInv" type="button" class="btn btn-success btn-block">حفظ الفاتورة</button>
+                     </form>
                     </div>
                 </div>
             </div>
@@ -222,7 +247,7 @@
 
 <!-- Content wrapper -->
 @section Scripts {
+
     <script src="~/js/invoice.js"></script>
-   @*  <script src="~/js/salesInvoice.js"></script> *@
 }
 

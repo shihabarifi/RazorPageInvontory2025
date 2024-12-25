@@ -1,17 +1,26 @@
-﻿using RazorPageInvontory.Models;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using RazorPageInvontory.Models;
 using RazorPageInvontory.Modules.POSSys.Models;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace RazorPageInvontory.Modules.POSSys.DAL
 {
     public class POSSer
     {
         private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public POSSer(HttpClient httpClient)
+        public POSSer(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
+            this.httpContextAccessor = httpContextAccessor;
         }
         /// <summary>
         /// API جلب بيانات العملاء من
@@ -138,7 +147,8 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         {
             try
             {
-                //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var product = await _httpClient.GetFromJsonAsync<List<Products>>("/api/Product");
 
                 return product ?? new List<Products>(); // إرجاع قائمة العملاء مباشرةً
@@ -168,7 +178,7 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
             try
             {
                 //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-               // var product = await _httpClient.GetFromJsonAsync<List<Unit>>("/api/Units");
+          
                 var units = await _httpClient.GetFromJsonAsync<List<Unit>>($"/api/Units/{classId}"); // تمرير ClassID في URL
 
 
@@ -189,5 +199,34 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
                 return new List<Unit>();
             }
         }
+        /// <summary>
+        /// API جلب إضافة فاتورة بيع مباشر من
+        /// </summary>
+        /// <returns>نجاح العملية ام فشلها</returns>
+        public async Task<HttpResponseMessage> SendInvoiceToApiAsync(SPSellInvoice invoice)
+        {
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"/api/SPSellInvoice", invoice);
+                return response;
+              
+            }
+            catch (HttpRequestException ex)
+            {
+                // معالجة أخطاء HTTP (مثل مشاكل الاتصال أو رموز حالة خطأ)
+                Console.WriteLine($"HTTP Request Error: {ex.Message}");
+                // يمكنك هنا فحص ex.StatusCode للحصول على رمز حالة HTTP
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError); // أو رمي استثناء إذا كنت تفضل ذلك
+            }
+
+            catch (Exception ex)
+            {
+                // معالجة أي أخطاء أخرى
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }   
+        }
+        
     }
 }

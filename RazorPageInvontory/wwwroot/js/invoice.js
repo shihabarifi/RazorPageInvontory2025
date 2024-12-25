@@ -229,7 +229,7 @@ $(document).ready(function () {
     });
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
- //  دالة تقوم بإضافة حقل منتج جديد للفاتورة
+ //  دالة تقوم بإضافة صف منتج جديد للفاتورة
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function addProductToInvoice() {
@@ -334,6 +334,11 @@ $(document).ready(function () {
                 const firstOption = unitSelect.find('option:first');
                 if (firstOption.length) {
                     unitSelect.val(firstOption.val()).change(); // تعيين القيمة وتطبيق حدث change
+                    let currentRow = selector.closest('tr'); // تحديد الصف الحالي
+   
+      
+                    // تخزين الكمية المتاحة كخاصية مخصصة لحقل الكمية
+                    currentRow.find('.itemQuantity').val(1).change();
                 }
             },
             error: function () {
@@ -364,7 +369,11 @@ $(document).ready(function () {
         updateNetAmount();
     });
 
-       
+    //$('#addInv').on('click', function (e) {
+    //    e.preventDefault();
+    //    saveInvoice();
+    //});
+  
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //  //     حدث عند تغيير الوحدة في القائمة  
@@ -404,5 +413,112 @@ $(document).ready(function () {
 
 
 });
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// دالة لجمع تفاصيل الفاتورة
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// دالة لإرسال الفاتورة إلى الخادم
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+function collectInvoiceDetails() {
+    let invoiceDetails = [];
+
+    // المرور على كل صف في الجدول
+    $('#productsTable tbody tr').each(function () {
+        let row = $(this);
+        let detail = {
+            ClassID: row.find('.ProductID').val(), // رقم الصنف
+            UnitID: row.find('.unitName').val(), // رقم الوحدة
+            Quantity: parseFloat(row.find('.itemQuantity').val()) || 0, // الكمية
+            UnitPrice: parseFloat(row.find('.unitPrice').val()) || 0, // السعر
+            SubDescount: parseFloat(row.find('.itemDescountAmount').val()) || 0, // الخصم
+            TotalAMount: parseFloat(row.find('.SubTotal').val()) || 0 // الإجمالي
+        };
+
+        invoiceDetails.push(detail); // إضافة التفاصيل إلى المصفوفة
+    });
+
+    return invoiceDetails;
+}
+$("#addInv").on("click", function () {
+    // استخراج رمز AntiForgery من النموذج
+    const antiForgeryToken = $("input[name='__RequestVerificationToken']").val();
+    alert("sssss");
+    let sPSellInvoice = {
+        ID: -1,
+        PeriodNumber: $('#PeriodNumber').val(),
+        SalePointID: parseInt($('#SalePointID').val()),
+        TheNumber: $('#TheNumber').val(),
+        TheDate: $('#TheDate').val(),
+        ThePay: $('#ThePay').val(),
+        StoreID: parseInt($('#StoreID').val()),
+        AccountID: parseInt($('#AccountID').val()),
+        CustomerName: $('#CustomerName').val(),
+        Notes: $('#Notes').val(),
+        UserID: 1,
+        Descount: parseFloat($('#DiscountAmount').val()) || 0,
+        Debited: 1,
+        PayAmount: parseFloat($('#PaidAmoint').val()) || 0,
+        InvoiceDetails: collectInvoiceDetails() // جمع تفاصيل الفاتورة
+    };
+    // إرسال الطلب باستخدام jQuery.ajax
+    $.ajax({
+        url: "/POS?handler=Save", // تحقق من أن هذا المسار صحيح
+        method: "POST",
+        contentType: "application/json",
+        headers: {
+            "RequestVerificationToken": antiForgeryToken, // استخدام الرمز المستخرج
+        },
+        data: JSON.stringify(sPSellInvoice), // إرسال بيانات employeeData
+        success: function (response) {
+            $("#result").html(`<p>${response.message}</p>`); // عرض رسالة النجاح
+        },
+        error: function (xhr) {
+            $("#result").html(`<p style="color: red;">Error: ${xhr.responseText}</p>`); // عرض رسالة الخطأ
+        }
+    });
+});
+//function saveInvoice() {
+//    alert("sssss");
+//    let invoice = {
+//        ID: -1,
+//        PeriodNumber: $('#PeriodNumber').val(),
+//        SalePointID: parseInt($('#SalePointID').val()),
+//        TheNumber: $('#TheNumber').val(),
+//        TheDate: $('#TheDate').val(),
+//        ThePay: $('#ThePay').val(),
+//        StoreID: parseInt($('#StoreID').val()),
+//        AccountID:1,
+//        CustomerName: $('#CustomerName').val(),
+//        Notes: $('#Notes').val(),
+//        UserID: 1,
+//        Descount: parseFloat($('#DiscountAmount').val()) || 0,
+//        Debited: 1,
+//        PayAmount: parseFloat($('#PaidAmoint').val()) || 0,
+//        InvoiceDetails: collectInvoiceDetails() // جمع تفاصيل الفاتورة
+//    };
+//    alert("sdfsfdsf");
+//    $.ajax({
+//        url: "/POS?handler=Save", // يجب أن يكون الرابط صحيحًا
+//        type: 'POST',
+//        contentType: 'application/json',
+////        data: JSON.stringify(invoice), // تحويل البيانات إلى JSON
+//        data: { invoice: invoice },
+//        success: function (response) {
+//            if (response.success) {
+//                alert(response.message);
+//            } else {
+//                alert(response.message);
+//            }
+//        },
+//        error: function (xhr, status, error) {
+//           // console.error(error);
+//            alert('حدث خطأ أثناء حفظ الفاتورة');
+//        }
+//    });
+//}
+
 
 

@@ -2,6 +2,7 @@
 using RazorPageInvontory.Modules.POSSys.DAL;
 using RazorPageInvontory.Modules.POSSys.Models;
 using RazorPageInvontory.Modules.UsersSys.Models;
+using System.Text.Json;
 
 namespace RazorPageInvontory.Modules.POSSys.BLL
 {
@@ -46,5 +47,30 @@ namespace RazorPageInvontory.Modules.POSSys.BLL
 
             return await _posService.GetUnitsByClassIdDataAsync(ClassID);
         }
-    }
+        public async Task<(bool Success, string Message)> SendInvoiceToApiAsync(SPSellInvoice invoice)
+        {
+            try
+            {
+                var response = await _posService.SendInvoiceToApiAsync(invoice);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<(bool Success, string Message)>(responseString, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return (result.Success, result.Message);
+                }
+                else
+                {
+                    return (false, "حدث خطأ أثناء حفظ الفاتورة: " + response.ReasonPhrase);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, "حدث خطأ أثناء حفظ الفاتورة: " + ex.Message);
+            }
+        }
+
+        }
 }

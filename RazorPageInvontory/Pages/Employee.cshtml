@@ -1,0 +1,53 @@
+﻿@page
+@model EmployeeModel
+@{
+    ViewData["Title"] = "Add Employee";
+}
+
+<h2>Add Employee</h2>
+
+<div>
+    <form id="employeeForm" method="post" >
+        <input type="text" id="name" name="Name" placeholder="Employee Name" />
+        <input type="number" id="salary" name="Salary" placeholder="Salary" />
+         @Html.AntiForgeryToken() <!-- تضمين رمز التزوير -->
+        <button type="button" id="submitBtn">Save</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#submitBtn").on("click", function () {
+            // استخراج رمز AntiForgery من النموذج
+            const antiForgeryToken = $("input[name='__RequestVerificationToken']").val();
+
+            // بيانات الموظف
+            const employeeData = {
+                Name: $("#name").val(),
+                Salary: parseFloat($("#salary").val()),
+            };
+
+            // إرسال الطلب باستخدام jQuery.ajax
+            $.ajax({
+                url: "/Employee?handler=SaveEmployee", // تحقق من أن هذا المسار صحيح
+                method: "POST",
+                contentType: "application/json",
+                headers: {
+                    "RequestVerificationToken": antiForgeryToken, // استخدام الرمز المستخرج
+                },
+                data: JSON.stringify(employeeData), // إرسال بيانات employeeData
+                success: function (response) {
+                    $("#result").html(`<p>${response.message}</p>`); // عرض رسالة النجاح
+                },
+                error: function (xhr) {
+                    $("#result").html(`<p style="color: red;">Error: ${xhr.responseText}</p>`); // عرض رسالة الخطأ
+                }
+            });
+        });
+    });
+
+
+</script>
