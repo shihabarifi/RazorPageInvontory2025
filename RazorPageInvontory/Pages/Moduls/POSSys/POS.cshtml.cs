@@ -32,6 +32,7 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
             if (invoiceId.HasValue)
             {
                 Products = _bLLShared.ProductsAsync().Result;
+
                 // ≈–«  „  „—Ì— „⁄—› ›« Ê—…° Ì „ Ã·» »Ì«‰« Â«
                 sPSellInvoice = await _posManager.GetInvoiceByIdAsync(invoiceId.Value);
 
