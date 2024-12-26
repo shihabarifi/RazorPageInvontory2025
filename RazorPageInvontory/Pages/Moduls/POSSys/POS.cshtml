@@ -17,7 +17,9 @@
             <!-- Select2 -->
             <div class="col-12">
                 <div class="card mb-4">
-                    <h5 class="card-header">إضافة</h5>
+                        <h5 class="card-header">
+                            @(Model.sPSellInvoice?.ID < 0 ? "إضافة" : "تعديل")
+                        </h5>
                      <div id="result"></div>
                     <div class="card-body">
                         <div class="row">
@@ -40,7 +42,8 @@
                                     {
                                         @foreach (var Fund in Model.Funds)
                                         {
-                                            <option value="@Fund.ID">@Fund.FundName</option>
+                                            @* <option value="@Fund.ID" selected="@(Fund.ID == Model.sPSellInvoice?.AccountID ? "selected" : null)">@Fund.FundName</option> *@
+                                            <option value="@Fund.ID">@Fund.FundName</option> 
                                         }
                                     }
 
@@ -128,7 +131,7 @@
                                  @* الرقم  *@
                                 <div class="col-12 col-lg-6 col-xl-4 mb-0 mb-4">
                                     <label class="form-label" for="form-repeater-1-1">الرقم</label>
-                                    <input asp-for="sPSellInvoice.TheNumber" id="TheNumber" type="text" value="1" class="form-control" readonly>
+                                    <input asp-for="sPSellInvoice.TheNumber" id="TheNumber" value="@(Model.sPSellInvoice?.TheNumber)" type="text"  class="form-control" readonly>
                                 </div>
 
                                 @* الملاحظة *@
@@ -168,7 +171,42 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                       
+                                        @if (Model.sPSellInvoice?.InvoiceDetails != null && Model.sPSellInvoice.InvoiceDetails.Any())
+                                        {
+                                            @for (var i = 0; i < Model.sPSellInvoice.InvoiceDetails.Count; i++)
+                                            {
+                                                var detail = Model.sPSellInvoice.InvoiceDetails[i];
+                                                <tr>
+                                                    <td><input value="@detail.ClassID" type="text" class="form-control ProductID" placeholder="رقم الصنف"></td>
+                                                    <td>
+                                                        <select class="form-select productSelect">
+                                                            <option value="">اسم الصنف</option>
+                                                            @* هنا يجب إضافة خيارات الأصناف من Model.Products *@
+                                                            @if (Model.Products != null)
+                                                            {
+                                                                @foreach (var product in Model.Products)
+                                                                {
+                                                                    <option value="@product.ID" selected="@(product.ID == detail.ClassID ? "selected" : "")">@product.ClassName</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select unitName select2">
+                                                            <option value="">اسم الوحدة</option>
+                                                            @* هنا يجب إضافة خيارات الوحدات بناءً على الصنف المحدد *@
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" class="form-control unitPrice" value="@detail.UnitPrice" placeholder="السعر"></td>
+                                                    <td><input type="number" class="form-control quantity-input" value="@detail.Quantity" data-index="@i"></td>
+                                                    <td><input type="number" class="form-control discount-percentage-input" value="@detail.SubDescount" data-index="@i"></td>
+                                                    <td style="display: none;"><span class="discount-amount" data-index="@i">@detail.SubDescount</span></td>
+                                                    <td><span class="total-price" data-index="@i">@detail.TotalAMount</span></td>
+                                                    <td><button type="button" class="btn btn-danger remove-product" data-index="@i">حذف</button></td>
+                                                </tr>
+                                            }
+                                        }
+
 
                                     </tbody>
                                 </table>

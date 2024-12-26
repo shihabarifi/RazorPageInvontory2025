@@ -31,6 +31,7 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
 
             if (invoiceId.HasValue)
             {
+                Products = _bLLShared.ProductsAsync().Result;
                 // ≈–«  „  „—Ì— „⁄—› ›« Ê—…° Ì „ Ã·» »Ì«‰« Â«
                 sPSellInvoice = await _posManager.GetInvoiceByIdAsync(invoiceId.Value);
 
@@ -107,8 +108,9 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
         public List<SalePointUser> SalePoints { get; set; }
         public List<Store> Stores { get; set; }
         public List<CustomerInfo> Customers { get; set; } = new List<CustomerInfo>();
-        
-        
+        public List<Products> Products { get; set; } = new List<Products>();
+
+
         [BindProperty]
         public decimal TotalAmount { get; set; }
         [BindProperty]
