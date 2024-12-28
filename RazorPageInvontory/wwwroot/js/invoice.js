@@ -25,10 +25,11 @@
     function attachEventListeners() {
         // اختيار المنتج وتحديث رقم المنتج
         $('#productsTable').on('change', '.productSelect', function () {
+            if (preventChangeEvent) return; // تجاهل إذا تم تغيير القيمة برمجيًا
             const selectedValue = $(this).val();
             const currentRow = $(this).closest('tr');
             currentRow.find('.ProductID').val(selectedValue);
-
+            currentRow.find('.itemQuantity').val(1);
             if (selectedValue) {
                 const unitSelect = currentRow.find('.unitName');
                 fetchUnits(selectedValue, unitSelect);
@@ -68,7 +69,8 @@
             invoiceId = $('#invoiceId').val();
             if (invoiceId==0) 
                 currentRow.find('.itemQuantity').data('max-quantity', maxQuantity || 0).val(1).trigger('input');
-               
+          //  var Q = currentRow.find('.itemQuantity').val();
+            currentRow.find('.itemQuantity').val(currentRow.find('.itemQuantity').val()).trigger('input');
             
         });
 
@@ -258,64 +260,62 @@
     }
 
     function loadInvoiceForEditing(invoiceData) {
-     
-        // تفريغ الجدول الحالي
         $('#productsTable tbody').empty();
-        
-        // المرور على تفاصيل الفاتورة وإضافة الصفوف
+
         invoiceData.forEach(detail => {
-          //  alert(detail.classID);
+            const classID = parseInt(detail.classID);
+            const unitID = parseInt(detail.unitID);
+
             let newRow = $(`
-        <tr>
-            <td><input type="text" class="form-control ProductID" value="${detail.classID}" placeholder="رقم الصنف"></td>
-
-            <td>
-                <select class="form-select productSelect ">
-                    <option value="">اسم الصنف</option>
-                </select>
-            </td>
-
-            <td>
-                <select class="form-select unitName select2">
-                    <option value="">اسم الوحدة</option>
-                </select>
-            </td>
-
-            <td><input type="number" class="form-control unitPrice" value="${detail.unitPrice}" placeholder="السعر"></td>
-            <td><input type="number" class="form-control itemQuantity" value="${detail.quantity}" placeholder="الكمية"></td>
-            <td><input type="number" class="form-control itemDescountRatio" value="${detail.subDescount}" placeholder="نسبة الخصم"></td>
-            <td style="display: none;"><input type="number" class="form-control itemDescountAmount" value="${detail.subDescount}" required ReadOnly></td>
-            <td><input type="number" class="form-control SubTotal" value="${detail.totalAMount}" required readonly></td>
-
-            <td><button type="button" class="btn btn-label-danger removeProduct"><i class="bx bx-trash"></i></button></td>
-        </tr>
+            <tr>
+                <td><input type="text" class="form-control ProductID" value="${detail.classID}" placeholder="رقم الصنف"></td>
+                <td>
+                    <select class="form-select productSelect">
+                        <option value="">اسم الصنف</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-select unitName">
+                        <option value="">اسم الوحدة</option>
+                    </select>
+                </td>
+                <td><input type="number" class="form-control unitPrice" value="${detail.unitPrice}" placeholder="السعر"></td>
+                <td><input type="number" class="form-control itemQuantity" value="${detail.quantity}" placeholder="الكمية"></td>
+                <td><input type="number" class="form-control itemDescountRatio" value="${detail.subDescount}" placeholder="نسبة الخصم"></td>
+                <td style="display: none;"><input type="number" class="form-control itemDescountAmount" value="${detail.subDescount}" required readonly></td>
+                <td><input type="number" class="form-control SubTotal" value="${detail.totalAMount}" required readonly></td>
+                <td><button type="button" class="btn btn-label-danger removeProduct"><i class="bx bx-trash"></i></button></td>
+            </tr>
         `);
 
-            // إضافة الصف إلى الجدول
             $('#productsTable tbody').append(newRow);
 
-            // إعداد الحقول الجديدة
+            // تهيئة Select2
             newRow.find('.productSelect').select2({
                 placeholder: "اختر عنصرًا",
                 allowClear: true
             });
 
-            // جلب قائمة المنتجات للـ productSelect
-            fetchProductsX(newRow.find('.productSelect'), detail.classID);
+            // تحميل المنتجات مع تحديد المنتج الحالي
+            fetchProductsX(newRow.find('.productSelect'), classID);
 
-            // عند اختيار المنتج، تحديث الوحدات
+            // إعداد مستمع الحدث للمنتج
+            const currentRow = newRow;
             newRow.find('.productSelect').on('change', function () {
-                let productId = $(this).val();
-                newRow.find('.ProductID').val(productId);
-                let unitSelect = newRow.find('.unitName');
-                fetchUnitsX(productId, unitSelect, detail.unitID); // تحميل الوحدات للمنتج وتحديد الوحدة الحالية
+                const productId = $(this).val();
+                currentRow.find('.ProductID').val(productId);
+                const unitSelect = currentRow.find('.unitName');
+                if (productId) {
+                    fetchUnitsX(productId, unitSelect, unitID);
+                }
             });
         });
     }
 
     // تعديل fetchProducts لدعم تحديد المنتج المحدد
+    let preventChangeEvent = false;
+
     function fetchProductsX(selector, selectedProductID = null) {
-       // alert("sdsd"+selectedProductID);
         $.ajax({
             url: "/POS?handler=GetProducts",
             method: "GET",
@@ -328,8 +328,11 @@
                         `<option value="${product.id}" ${isSelected}>${product.className}</option>`
                     );
                 });
+
                 if (selectedProductID) {
-                    productSelect.val(selectedProductID).change(); // اختيار المنتج الحالي
+                    preventChangeEvent = true; // منع تنفيذ حدث change مؤقتًا
+                    productSelect.val(selectedProductID).change();
+                    preventChangeEvent = false;
                 }
             },
             error: function () {
@@ -338,27 +341,29 @@
         });
     }
 
+
     // تعديل fetchUnits لدعم الوحدة المحددة
     function fetchUnitsX(productID, selector, selectedUnitID = null) {
-       alert("QQ"+ selectedUnitID);
         $.ajax({
             url: "/POS?handler=GetUnits",
             method: "GET",
             data: { productID: productID },
-            
             success: function (data) {
                 const unitSelect = $(selector);
                 unitSelect.empty();
-
                 data.forEach(unit => {
                     let isSelected = unit.id === selectedUnitID ? "selected" : "";
                     unitSelect.append(`
-                    <option value="${unit.id}" data-price="${unit.partingPrice}" data-quantity="99" data-exchangeFactor="${unit.exchangeFactor}" ${isSelected}>${unit.unitName}</option>
+                    <option value="${unit.id}" data-price="${unit.partingPrice}" data-quantity="${unit.availableQuantity}" ${isSelected}>
+                        ${unit.unitName}
+                    </option>
                 `);
                 });
 
                 if (selectedUnitID) {
-                    unitSelect.val(selectedUnitID).change(); // اختيار الوحدة الحالية
+                    preventChangeEvent = true; // منع تنفيذ حدث change مؤقتًا
+                    unitSelect.val(selectedUnitID).change();
+                    preventChangeEvent = false;
                 }
             },
             error: function () {
@@ -366,5 +371,6 @@
             }
         });
     }
+
 
 });
