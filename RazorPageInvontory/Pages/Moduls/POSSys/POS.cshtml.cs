@@ -27,22 +27,44 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
             Funds = await _bLLShared.FundUserAsync();
             SalePoints = await _posManager.SalesPointsAsync();
             Stores = await _bLLShared.StoreAsync();
-
+          
 
             if (invoiceId.HasValue)
             {
                 Products = _bLLShared.ProductsAsync().Result;
 
                 // ≈–«  „  „—Ì— „⁄—› ›« Ê—…° Ì „ Ã·» »Ì«‰« Â«
+                
                 sPSellInvoice = await _posManager.GetInvoiceByIdAsync(invoiceId.Value);
-
+                TotalAmount = sPSellInvoice.InvoiceDetails.Sum(x => x.TotalAMount);
+                DiscountAmount = sPSellInvoice.Descount;
+                paidAmoint = sPSellInvoice.PayAmount;
                 if (sPSellInvoice == null)
                 {
                     // ›Ì Õ«· ·„ Ì „ «·⁄ÀÊ— ⁄·Ï «·›« Ê—…° Ì „ ≈⁄«œ…  ÊÃÌÂ «·„” Œœ„ √Ê ⁄—÷ —”«·… Œÿ√
                     RedirectToPage("/NotFound");
                 }
             }
+            else
+            {
+                sPSellInvoice.TheNumber = "15";
+
+            }
            
+        }
+
+        public async Task<IActionResult> OnGetInvoiceJsonAsync(int invoiceId)
+        {
+                         
+            var invoice = await _posManager.GetInvoiceByIdAsync(invoiceId);
+            var inv = invoice.InvoiceDetails;
+           
+            if (invoice == null)
+            {
+                return NotFound("Invoice not found.");
+            }
+
+            return new JsonResult(inv); //  ÕÊÌ· »Ì«‰«  «·›« Ê—… ≈·Ï JSON
         }
 
 
@@ -85,16 +107,29 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
         public async Task<IActionResult> OnPostSaveAsync([FromBody] SPSellInvoice sPSellInvoice)
         {
             if (true)
-            {
+            {//›Ì «· ⁄œÌ· 
+                if (sPSellInvoice.ID > 0)
+                {
+                    var Editresult = _posManager.SendInvoiceForEditToApiAsync(sPSellInvoice).Result;
+                    if (Editresult.Success)
+                    {
+                        return new JsonResult(new { Editresult.Success, Editresult.Message });
+                    }
+                    else
+                    {
+                        Editresult.Message = "ÕœÀ Œÿ√ √À‰«¡ Õ›Ÿ «·›« Ê—…: ";
+                        return new JsonResult(new { Editresult.Success, Editresult.Message });
+                    }
+                }
                 var result = _posManager.SendInvoiceToApiAsync(sPSellInvoice).Result;
                 if (result.Success)
                 {
-                    return new JsonResult(new { result.Message });
+                    return new JsonResult(new { result.Success, result.Message });
                 }
                 else
                 {
-                    string message = "ÕœÀ Œÿ√ √À‰«¡ Õ›Ÿ «·›« Ê—…: ";
-                    return new JsonResult(new { message });
+                    result.Message = "ÕœÀ Œÿ√ √À‰«¡ Õ›Ÿ «·›« Ê—…: ";
+                    return new JsonResult(new { result.Success, result.Message });
                 }
             }
         }

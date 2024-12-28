@@ -48,11 +48,70 @@ namespace RazorPageInvontory.Modules.POSSys.BLL
             }
         }
 
+        
+        public async Task<(bool Success, string Message)> SendInvoiceForEditToApiAsync(SPSellInvoice invoice)
+        {
+            try
+            {
+                var response = await _posService.SendInvoiceForEditToApiAsync(invoice);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+
+                    var result = JsonSerializer.Deserialize<InvoiceResponse>(responseString, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return (result.Success, " تم تعديل  فاتورة بيع مباشر بـID  :  " + result.id + " بنجاح");
+                }
+                else
+                {
+                    return (false, "حدث خطأ أثناء حفظ الفاتورة: " + response.ReasonPhrase);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, "حدث خطأ أثناء حفظ الفاتورة: " + ex.Message);
+            }
+        }
+
+
+
+        public async Task<(bool Success, string Message)> DeleteInvoiceAsync(int invoiceid)
+        {
+            try
+            {
+                var response = await _posService.DeleteInvoiceAsync(invoiceid);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+
+                    var result = JsonSerializer.Deserialize<InvoiceResponse>(responseString, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return (result.Success, " تم حذف  فاتورة بيع مباشر بـID  :  " + result.id + " بنجاح");
+                }
+                else
+                {
+                    return (false, "حدث خطأ أثناء حذف الفاتورة: " + response.ReasonPhrase);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, "حدث خطأ أثناء حفظ الفاتورة: " + ex.Message);
+            }
+        }
 
 
         public async Task<SPSellInvoice> GetInvoiceByIdAsync(int invoiceId)
         {
             return await _posService.GetInvoiceByIdAsync(invoiceId);
+        }
+
+        public async Task<List<SPSellInvoice>> GetInvoiceListAsync()
+        {
+            return await _posService.GetInvoiceListAsync();
         }
 
         public class InvoiceResponse

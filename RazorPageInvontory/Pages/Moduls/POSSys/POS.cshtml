@@ -23,6 +23,8 @@
                      <div id="result"></div>
                     <div class="card-body">
                         <div class="row">
+                                <input type="hidden" id="invoiceId" asp-for="sPSellInvoice.ID" value="@Model.sPSellInvoice?.ID" />
+
                             @* الفترة *@
                             <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                 <label for="select2Basic" class="form-label">الفترة</label>
@@ -138,7 +140,7 @@
                                 <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                                     <div class="input-group input-group-merge">
                                         <span class="input-group-text">الملاحظة</span>
-                                        <textarea asp-for="sPSellInvoice.Notes" id="" value="@(Model.sPSellInvoice?.Notes)" class="form-control" aria-label="With textarea" style="height: 66px;"></textarea>
+                                        <textarea asp-for="sPSellInvoice.Notes" id="Notes" value="@(Model.sPSellInvoice?.Notes)" class="form-control" aria-label="With textarea" style="height: 66px;"></textarea>
                                     </div>
                                 </div>
 
@@ -179,14 +181,22 @@
                                                 <tr>
                                                     <td><input value="@detail.ClassID" type="text" class="form-control ProductID" placeholder="رقم الصنف"></td>
                                                     <td>
-                                                        <select class="form-select productSelect ">
+                                                        <select onchange="xx()" class="form-select productSelect ">
                                                          
                                                             @* هنا يجب إضافة خيارات الأصناف من Model.Products *@
                                                             @if (Model.Products != null)
                                                             {
                                                                 @foreach (var product in Model.Products)
                                                                 {
-                                                                    <option value="@product.ID" selected="@(product.ID == detail.ClassID ? "selected" : "")">@product.ClassName</option>
+                                                                    if (product.ID == detail.ClassID)
+                                                                   {
+                                                                        <option value="@product.ID" selected>@product.ClassName</option>
+                                                                   }
+                                                                   else
+                                                                   {
+                                                                        <option value="@product.ID">@product.ClassName</option>
+                                                                   }
+                                                                   
                                                                 }
                                                             }
                                                         </select>
@@ -197,11 +207,11 @@
                                                             @* هنا يجب إضافة خيارات الوحدات بناءً على الصنف المحدد *@
                                                         </select>
                                                     </td>
-                                                    <td><input type="number" class="form-control unitPrice" value="@detail.UnitPrice" placeholder="السعر"></td>
-                                                     <td><input type="number" class="form-control itemQuantity" value="@detail.Quantity" placeholder="الكمية"></td>
-                                                     <td><input type="number" class="form-control itemDescountRatio" value="@detail.SubDescount" placeholder="نسبة الخصم"></td>
+                                                    <td><input type="number" class="form-control unitPrice" value="@Math.Round(detail.UnitPrice,1)" placeholder="السعر"></td>
+                                                     <td><input type="number" class="form-control itemQuantity" value="@Math.Round( detail.Quantity,0)" placeholder="الكمية"></td>
+                                                     <td><input type="number" class="form-control itemDescountRatio" value="@Math.Round(detail.SubDescount,1)" placeholder="نسبة الخصم"></td>
                                                      <td style="display: none;"><input type="number" class="form-control itemDescountAmount" value="@detail.SubDescount" required ReadOnly></td>
-                                                     <td><input type="number" class="form-control SubTotal" value="@detail.TotalAMount" required readonly></td>
+                                                    <td><input type="number" class="form-control SubTotal" value="@Math.Round(detail.TotalAMount,1)" required readonly></td>
                                                      <td><button type="button" class="btn btn-label-danger removeProduct"><i class="bx bx-trash"></i></button></td>
 
 
@@ -213,7 +223,7 @@
                                     </tbody>
                                 </table>
                                 
-                                <button type="button" id="addProduct" class="btn btn-primary" style="margin-top: 10px;"><i class="bx bx-plus"></i> إضافة جديد </button>
+                                <button type="button" id="addRow" class="btn btn-primary" style="margin-top: 10px;"><i class="bx bx-plus"></i> إضافة جديد </button>
                             </div>
 
                             <!-- المبالغ الإجمالية -->
@@ -261,14 +271,7 @@
                                    
                                 </table>
                                 
-                               
-                                
 
-                               
-
-                            
-                                <!-- حقل مخفي يحتوي على قيمة رقم المستخدم -->
-                                <input type="hidden" id="createdBy" name="createdBy" value="1" />
                             </div>
                             @Html.AntiForgeryToken() <!-- تضمين رمز التزوير -->
                             <button id="addInv" type="button" class="btn btn-success btn-block">حفظ الفاتورة</button>

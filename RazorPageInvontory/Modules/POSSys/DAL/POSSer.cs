@@ -204,8 +204,9 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
                 return new List<Unit>();
             }
         }
+
         /// <summary>
-        /// API جلب إضافة فاتورة بيع مباشر من
+        /// API  إضافة فاتورة بيع مباشر من
         /// </summary>
         /// <returns>نجاح العملية ام فشلها</returns>
         public async Task<HttpResponseMessage> SendInvoiceToApiAsync(SPSellInvoice invoice)
@@ -235,6 +236,67 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
             }   
         }
 
+        /// <summary>
+        /// API  تعديل فاتورة بيع مباشر من
+        /// </summary>
+        /// <returns>نجاح العملية ام فشلها</returns>
+        public async Task<HttpResponseMessage> SendInvoiceForEditToApiAsync(SPSellInvoice invoice)
+        {
+
+            try
+            {
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.PutAsJsonAsync($"/api/SPSellInvoice/{invoice.ID}", invoice);
+                return response;
+
+            }
+            catch (HttpRequestException ex)
+            {
+                // معالجة أخطاء HTTP (مثل مشاكل الاتصال أو رموز حالة خطأ)
+                Console.WriteLine($"HTTP Request Error: {ex.Message}");
+                // يمكنك هنا فحص ex.StatusCode للحصول على رمز حالة HTTP
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError); // أو رمي استثناء إذا كنت تفضل ذلك
+            }
+
+            catch (Exception ex)
+            {
+                // معالجة أي أخطاء أخرى
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// API  تعديل فاتورة بيع مباشر من
+        /// </summary>
+        /// <returns>نجاح العملية ام فشلها</returns>
+        public async Task<HttpResponseMessage> DeleteInvoiceAsync(int invoiceid)
+        {
+
+            try
+            {
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.DeleteAsync($"/api/SPSellInvoice/{invoiceid}");
+                return response;
+
+            }
+            catch (HttpRequestException ex)
+            {
+                // معالجة أخطاء HTTP (مثل مشاكل الاتصال أو رموز حالة خطأ)
+                Console.WriteLine($"HTTP Request Error: {ex.Message}");
+                // يمكنك هنا فحص ex.StatusCode للحصول على رمز حالة HTTP
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError); // أو رمي استثناء إذا كنت تفضل ذلك
+            }
+
+            catch (Exception ex)
+            {
+                // معالجة أي أخطاء أخرى
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
 
         /// <summary>
         /// API جلب بيانات الفاتورة من
@@ -261,6 +323,36 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
             {
                 // معالجة الأخطاء العامة
                 throw new Exception($"حدث خطأ أثناء جلب الفاتورة: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// API جلب بيانات الاصناف من
+        /// </summary>
+        /// <returns>قائمة باسماء الاصناف</returns>
+        public async Task<List<SPSellInvoice>> GetInvoiceListAsync()
+        {
+            try
+            {
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var pSellInvoices = await _httpClient.GetFromJsonAsync<List<SPSellInvoice>>("/api/SPSellInvoice");
+
+                return pSellInvoices ?? new List<SPSellInvoice>(); // إرجاع قائمة العملاء مباشرةً
+            }
+            catch (HttpRequestException ex)
+            {
+                // معالجة أخطاء HTTP (مثل مشاكل الاتصال أو رموز حالة خطأ)
+                Console.WriteLine($"HTTP Request Error: {ex.Message}");
+                // يمكنك هنا فحص ex.StatusCode للحصول على رمز حالة HTTP
+                return new List<SPSellInvoice>(); // أو رمي استثناء إذا كنت تفضل ذلك
+            }
+
+            catch (Exception ex)
+            {
+                // معالجة أي أخطاء أخرى
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return new List<SPSellInvoice>();
             }
         }
 
