@@ -5,9 +5,9 @@
         addNewRowToInvoice();
         attachEventListeners();
     }
-        let invoiceId = $('#invoiceId').val(); // رقم الفاتورة موجود في عنصر مخفي
+    let invoiceId = $('#invoiceId').val(); // رقم الفاتورة موجود في عنصر مخفي
 
-    if (invoiceId>0) {
+    if (invoiceId > 0) {
         // جلب بيانات الفاتورة من الخادم
         $.ajax({
             url: `/POS?handler=InvoiceJson&invoiceId=${invoiceId}`, // Endpoint الباك-إند
@@ -24,8 +24,10 @@
 
     function attachEventListeners() {
         // اختيار المنتج وتحديث رقم المنتج
-        $('#productsTable').on('change', '.productSelect', function () {
-            if (preventChangeEvent) return; // تجاهل إذا تم تغيير القيمة برمجيًا
+
+        $('#productsTable').on('change', '.productSelect', function (event, isProgrammatic) {
+            if (isProgrammatic) return; // تجاهل إذا كان التغيير برمجيًا
+
             const selectedValue = $(this).val();
             const currentRow = $(this).closest('tr');
             currentRow.find('.ProductID').val(selectedValue);
@@ -67,11 +69,11 @@
 
             currentRow.find('.unitPrice').val(unitPrice || '');
             invoiceId = $('#invoiceId').val();
-            if (invoiceId==0) 
+            if (invoiceId == 0)
                 currentRow.find('.itemQuantity').data('max-quantity', maxQuantity || 0).val(1).trigger('input');
-          //  var Q = currentRow.find('.itemQuantity').val();
+            //  var Q = currentRow.find('.itemQuantity').val();
             currentRow.find('.itemQuantity').val(currentRow.find('.itemQuantity').val()).trigger('input');
-            
+
         });
 
         // التحقق من الكمية
@@ -199,7 +201,7 @@
             TheDate: $('#TheDate').val(),
             ThePay: $('#ThePay').val(),
             StoreID: parseInt($('#StoreID').val()),
-            AccountID:1,
+            AccountID: 1,
             CustomerName: $('#CustomerName').val(),
             Notes: $('#Notes').val(),
             UserID: 1,
@@ -220,19 +222,19 @@
             },
             data: JSON.stringify(invoiceData),
             success: function (response) {
-                if (response.success) { 
-                Swal.fire({
-                    title: 'نجاح',
-                    text: response.message,
-                    icon: 'success'
-                });
-            }else{
-                Swal.fire({
-                    title: 'خطأ',
-                    text: response.message,
-                    icon: 'error'
-                });
-            }
+                if (response.success) {
+                    Swal.fire({
+                        title: 'نجاح',
+                        text: response.message,
+                        icon: 'success'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'خطأ',
+                        text: response.message,
+                        icon: 'error'
+                    });
+                }
             },
             error: function (xhr) {
                 Swal.fire({
@@ -313,7 +315,7 @@
     }
 
     // تعديل fetchProducts لدعم تحديد المنتج المحدد
-    let preventChangeEvent = false;
+    //let preventChangeEvent = false;
 
     function fetchProductsX(selector, selectedProductID = null) {
         $.ajax({
@@ -330,9 +332,8 @@
                 });
 
                 if (selectedProductID) {
-                    preventChangeEvent = true; // منع تنفيذ حدث change مؤقتًا
-                    productSelect.val(selectedProductID).change();
-                    preventChangeEvent = false;
+                    productSelect.val(selectedProductID).trigger('change', [true]); // تمرير "true" لتجنب الحدث
+
                 }
             },
             error: function () {
@@ -361,9 +362,9 @@
                 });
 
                 if (selectedUnitID) {
-                    preventChangeEvent = true; // منع تنفيذ حدث change مؤقتًا
+
                     unitSelect.val(selectedUnitID).change();
-                    preventChangeEvent = false;
+
                 }
             },
             error: function () {
