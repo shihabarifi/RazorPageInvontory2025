@@ -96,6 +96,7 @@
                             <th>الرقم</th>
                             <th>الفترة</th>
                             <th>نقطة البيع</th>
+                            <th> اسم الحساب</th>
                             <th>التاريخ</th>
                             <th>الدفع</th>
                             <th>المخزن</th>
@@ -112,13 +113,14 @@
                         {
                             @foreach (var invoice in Model.Invoices)
                             {
-                                <tr>
+                                <tr data-invoice-id="@invoice.ID" >
                                     <td>@invoice.ID</td>
                                     <td>@invoice.PeriodNumber</td>
                                     <td>@invoice.SalePointID</td>
+                                    <td>@invoice.AccountName</td>
                                     <td>@Convert.ToDateTime(invoice.TheDate).ToShortDateString()</td>
                                     <td>@invoice.ThePay</td>
-                                    <td>@invoice.StoreID</td>
+                                    <td>@invoice.StoreName</td>
                                     <td>@invoice.CustomerName</td>
                                     <td>@Math.Round( invoice.Descount,1)</td>
                                     <td>@{
@@ -141,7 +143,7 @@
                                                 <a data-bs-toggle="modal" data-bs-target="#referAndEarn" data-invoice-id="@invoice.ID" href="#" class="dropdown-item details-record"><i class="menu-icon tf-icons bx bx-spreadsheet"></i>تفاصيل</a>
                                                 <a href="/pos?invoiceId=@invoice.ID" class="dropdown-item"><i class="bx bxs-edit"></i>تعديل</a>
                                                 <div class="dropdown-divider"></div>
-                                                <a href="javascript:;" class="dropdown-item text-danger delete-record"><i class="bx bx-trash"></i>حذف</a>
+                                                <a href="javascript:;" data-invoice-id="@invoice.ID" class="dropdown-item text-danger delete-record"><i class="bx bx-trash"></i>حذف</a>
                                           
                                             </div>
                                         </div>
@@ -224,18 +226,18 @@
                                 $('#productsTable tbody').empty();
 
                                 // إضافة البيانات المسترجعة إلى الجدول
-                            response.inv.forEach(function (item) {
+                                response.detail.forEach(function (item) {
                                    //alert(item.classID);
                                     $('#productsTable tbody').append(`
                                                 <tr>
-                                                            <td>${item.classID}</td>
-                                                            <td>${item.classID}</td>
-                                                            <td>${item.unitID}</td>
-                                                            <td>${item.unitPrice}</td>
-                                                            <td>${item.quantity}</td>
-                                                            <td>${item.subDescount}</td>
-                                                            <td>${item.subDescount}</td>
-                                                            <td>${item.totalAMount}</td>
+                                                                    <td>${item.classNumber}</td>
+                                                                    <td>${item.className}</td>
+                                                                    <td>${item.unitName}</td>
+                                                                    <td>${item.unitPrice}</td>
+                                                                    <td>${item.quantity}</td>
+                                                                    <td>${item.subDescount}</td>
+                                                                    <td>${item.subDescount}</td>
+                                                                    <td>${item.totalAmount}</td>
                                                 </tr>
                                             `);
                                 });
@@ -267,7 +269,8 @@
             // حذف الفاتورة عند الضغط على زر الحذف
             $('.delete-record').on('click', function () {
                 // التأكد من الحصول على الـ ID
-                var invoiceId = $(this).closest('tr').find('td:first').text(); // جلب الـ ID من الخلية الأولى في الصف
+                var invoiceId = $(this).data('invoice-id'); // جلب معرف الفاتورة من الزر
+               // var invoiceId = $(this).closest('tr').find('td:first').text(); // جلب الـ ID من الخلية الأولى في الصف
                 const antiForgeryToken = $("input[name='__RequestVerificationToken']").val(); // جلب قيمة التوكن المضاد للـ CSRF
 
                 // التأكد من أن الـ ID موجود
@@ -291,21 +294,20 @@
                           
                                 success: function (response) {
                                     if (response.success) {
-                                        var row = $(this).closest('tr').remove();
+                                       
                                        // إخفاء الصف تدريجياً في 1 ثانية
                                         Swal.fire({
                                             title: 'تم الحذف!',
                                             text: response.message, // عرض رسالة النجاح
                                             icon: 'success'
                                         }).then(() => {
+                                            var row = $(`tr[data-invoice-id="${invoiceId}"]`); // تحديد الصف بناءً على معرف الفاتورة
 
-                                          //  $('.datatables-basic').row($(this).parents('tr')).remove().draw();
-                                           
-
-                                            // تغيير لون الصف إلى الأحمر تدريجياً قبل إخفائه
-                                            // var row = $(this).closest('tr');
-                                            // row.css('background-color', 'red')  // تعيين اللون الأحمر
-                                            //     .fadeOut(1000);  // إخفاء الصف تدريجياً في 1 ثانية
+                                            // تغيير لون الصف تدريجياً إلى الأحمر
+                                            row.css("background-color", "#ffcccc");
+                                            row.fadeOut(1000, function () {
+                                                $(this).remove(); // إزالة الصف بعد انتهاء التأثير
+                                            });
 
                                         });
                                     } else {

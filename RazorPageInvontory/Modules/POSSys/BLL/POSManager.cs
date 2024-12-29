@@ -109,7 +109,12 @@ namespace RazorPageInvontory.Modules.POSSys.BLL
             return await _posService.GetInvoiceByIdAsync(invoiceId);
         }
 
-        public async Task<List<SPSellInvoice>> GetInvoiceListAsync()
+        public async Task<List<InvoiceDetail>> GetInvoiceDetailsAsync(int invoiceId)
+        {
+            return await _posService.GetInvoiceDetailsAsync(invoiceId);
+        }
+
+        public async Task<List<HeaderInvoice>> GetInvoiceListAsync()
         {
             return await _posService.GetInvoiceListAsync();
         }

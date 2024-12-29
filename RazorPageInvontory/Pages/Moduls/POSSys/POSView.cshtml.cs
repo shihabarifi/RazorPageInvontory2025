@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using RazorPageInvontory.Modules.POSSys.BLL;
 using RazorPageInvontory.Modules.POSSys.Models;
 using RazorPageInvontory.Shared.BLLSharedALL;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace RazorPageInvontory.Pages.Moduls.POSSys
@@ -17,7 +18,7 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
             _posManager = posManager;
            
         }
-        public List<SPSellInvoice> Invoices { get; set; }
+        public List<HeaderInvoice> Invoices { get; set; }
         public async Task OnGetAsync()
         {
             try
@@ -28,10 +29,31 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
             {
                 // „⁄«·Ã… «·Œÿ√ ( ”ÃÌ· «·Œÿ√° ⁄—÷ —”«·… ··„” Œœ„° ≈·Œ.)
                 Console.WriteLine($"Error fetching invoices: {ex.Message}");
-                Invoices = new List<SPSellInvoice>(); //  ÂÌ∆… ﬁ«∆„… ›«—€… · Ã‰» √Œÿ«¡ «·⁄—÷
+                Invoices = new List<HeaderInvoice>(); //  ÂÌ∆… ﬁ«∆„… ›«—€… · Ã‰» √Œÿ«¡ «·⁄—÷
             }
         }
 
+    
+
+        //GetInvoiceDetails
+        public async Task<IActionResult> OnGetGetInvoiceDetailsAsync(int invoiceId)
+        {
+
+            List < InvoiceDetail> detail = new List<InvoiceDetail>();
+
+            detail = await _posManager.GetInvoiceDetailsAsync(invoiceId);
+            //var inv = invoice;
+
+            if (detail == null)
+            {
+                return NotFound("Invoice not found.");
+            }
+            return new JsonResult(new { success = true, detail });
+           // return new JsonResult(inv); //  ÕÊÌ· »Ì«‰«  «·›« Ê—… ≈·Ï JSON
+
+        }
+
+        //Õ–› ›« Ê—… »Ì⁄ „»«‘—
         public async Task<IActionResult> OnGetDeleteInvoice(int invoiceId)
         {
             var result = _posManager.DeleteInvoiceAsync(invoiceId).Result;
@@ -44,21 +66,6 @@ namespace RazorPageInvontory.Pages.Moduls.POSSys
                 result.Message = "ÕœÀ Œÿ√ √À‰«¡ Õ–› «·›« Ê—…: ";
                 return new JsonResult(new { result.Success, result.Message });
             }
-         
-        }
-
-        //GetInvoiceDetails
-        public async Task<IActionResult> OnGetGetInvoiceDetailsAsync(int invoiceId)
-        {
-            var invoice = await _posManager.GetInvoiceByIdAsync(invoiceId);
-            var inv = invoice.InvoiceDetails;
-
-            if (invoice == null)
-            {
-                return NotFound("Invoice not found.");
-            }
-            return new JsonResult(new { success = true, inv });
-           // return new JsonResult(inv); //  ÕÊÌ· »Ì«‰«  «·›« Ê—… ≈·Ï JSON
 
         }
 

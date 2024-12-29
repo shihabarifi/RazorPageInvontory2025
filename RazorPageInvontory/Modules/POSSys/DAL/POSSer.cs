@@ -330,31 +330,70 @@ namespace RazorPageInvontory.Modules.POSSys.DAL
         /// API جلب بيانات الاصناف من
         /// </summary>
         /// <returns>قائمة باسماء الاصناف</returns>
-        public async Task<List<SPSellInvoice>> GetInvoiceListAsync()
+        public async Task<List<HeaderInvoice>> GetInvoiceListAsync()
         {
             try
             {
                 var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var pSellInvoices = await _httpClient.GetFromJsonAsync<List<SPSellInvoice>>("/api/SPSellInvoice");
+                var pSellInvoices = await _httpClient.GetFromJsonAsync<List<HeaderInvoice>>("/api/SPSellInvoice");
 
-                return pSellInvoices ?? new List<SPSellInvoice>(); // إرجاع قائمة العملاء مباشرةً
+                return pSellInvoices ?? new List<HeaderInvoice>(); // إرجاع قائمة العملاء مباشرةً
             }
             catch (HttpRequestException ex)
             {
                 // معالجة أخطاء HTTP (مثل مشاكل الاتصال أو رموز حالة خطأ)
                 Console.WriteLine($"HTTP Request Error: {ex.Message}");
                 // يمكنك هنا فحص ex.StatusCode للحصول على رمز حالة HTTP
-                return new List<SPSellInvoice>(); // أو رمي استثناء إذا كنت تفضل ذلك
+                return new List<HeaderInvoice>(); // أو رمي استثناء إذا كنت تفضل ذلك
             }
 
             catch (Exception ex)
             {
                 // معالجة أي أخطاء أخرى
                 Console.WriteLine($"An error occurred: {ex.Message}");
-                return new List<SPSellInvoice>();
+                return new List<HeaderInvoice>();
             }
         }
+
+
+        /// <summary>
+        /// API جلب بيانات الاصناف من
+        /// </summary>
+        /// <returns>قائمة باسماء الاصناف</returns>
+        public async Task<List<InvoiceDetail>> GetInvoiceDetailsAsync(int invoiceId)
+        {
+            try
+            {
+                var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+               // var sPSellInvoice = await _httpClient.GetFromJsonAsync<SPSellInvoice>($"/api/SPSellInvoice/{id}");
+                var response = await _httpClient.GetFromJsonAsync<List<InvoiceDetail>>($"api/SPSellInvoice/details/{invoiceId}");
+
+                if (response == null)
+                {
+                    throw new Exception("الفاتورة غير موجودة.");
+                }
+             
+                return response;
+
+            }
+            catch (HttpRequestException ex)
+            {
+                // معالجة أخطاء HTTP
+                Console.Error.WriteLine($"HTTP Request Error: {ex.Message}");
+                throw; // إعادة رمي الاستثناء ليتم التعامل معه في الطبقة الأعلى
+            }
+            catch (Exception ex)
+            {
+                // معالجة أخطاء أخرى
+                Console.Error.WriteLine($"An error occurred: {ex.Message}");
+                throw;
+            }
+        }
+
+
+
 
     }
 }

@@ -18,16 +18,6 @@ builder.Services.AddRazorPages();
 //    options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
 //});
 
-builder.Services.AddHttpClient<AuthenticateUserSer>((provider, client) =>
-{
-    var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-    var token = httpContextAccessor.HttpContext?.Session.GetString("Token");
-
-    if (!string.IsNullOrEmpty(token))
-    {
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-    }
-});
 
 
 builder.Services.AddControllers().AddJsonOptions(options =>
